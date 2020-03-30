@@ -1,6 +1,0 @@
-C:\Users\murph\source\repos\Get-Writable\Get-Writable\bin\Debug\Get-Writable.exe
-C:\Users\murph\source\repos\Get-Writable\Get-Writable\bin\Debug\Get-Writable.pdb
-C:\Users\murph\source\repos\Get-Writable\Get-Writable\obj\Debug\Get-Writable.csproj.CoreCompileInputs.cache
-C:\Users\murph\source\repos\Get-Writable\Get-Writable\obj\Debug\Get-Writable.exe
-C:\Users\murph\source\repos\Get-Writable\Get-Writable\obj\Debug\Get-Writable.pdb
-C:\Users\murph\source\repos\Get-Writable\Get-Writable\obj\Debug\Get-Writable.csprojAssemblyReference.cache
