@@ -1,0 +1,10 @@
+# Visual Studio 2015 cache/options directory
+.vs/
+.vs/Get-Writable/v15/Server/sqlite3/storage.ide
+.vs/Get-Writable/v15/.suo
+.vs/Get-Writable/v15/.suo
+.vs/Get-Writable/v15/Server/sqlite3/storage.ide
+packages/
+Get-Writable/bin/*
+Get-Writable/obj/*
+Get-Writable/bin/Debug/
