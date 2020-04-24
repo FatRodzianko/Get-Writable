@@ -1,6 +1,6 @@
 # Get-Writable
  
-Searches for world writable directories that contain either a .exe, a .dll, or both.
+Searches for directories that contain a world writable .exe, a .dll, script file (.ps1, .bat, .sct), or a .sys file.
 
 ## Usage
 
