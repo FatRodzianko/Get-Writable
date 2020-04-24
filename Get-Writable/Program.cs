@@ -35,49 +35,6 @@ namespace Get_Writable
 
             ShowAllFoldersUnder(startDir);
 
-            //var uniqDirs = new HashSet<string>(directories);
-           
-
-            /*foreach (string dir in directories)
-            {
-                Console.WriteLine(dir);
-            }*/
-            /*try
-             {
-                 foreach (string folder in Directory.GetDirectories(startDir))
-                 {
-                     subDirs.Add(folder);
-                     Console.WriteLine(folder);
-                 }
-             }
-             catch (UnauthorizedAccessException) { }
-
-
-
-
-             foreach (string sub in subDirs)
-             {                
-                try
-                {
-                     string[] dirs = Directory.GetDirectories(sub, "*", SearchOption.AllDirectories);
-                     subDirs2.Add(sub);
-                     foreach (string dir in dirs)
-                     {
-                         subDirs2.Add(dir);
-                     }
-                }
-                catch (UnauthorizedAccessException) { Console.WriteLine("Cannot read: " + sub); }
-             }
-
-
-
-             foreach (string sub in subDirs2)
-             {
-                 Console.WriteLine(sub);
-             }
-
-
-             */
             foreach (string sub in directories)
             {
                 DirectoryInfo subInfo = new DirectoryInfo(sub);
@@ -123,99 +80,32 @@ namespace Get_Writable
                             {
                                 DirectoryInfo subInfo = new DirectoryInfo(folder);
                                 DirectorySecurity subSecurity = subInfo.GetAccessControl();
-                                foreach (FileSystemAccessRule rule in subSecurity.GetAccessRules(true, true, typeof(NTAccount)))
-                                {
-                                    if ((rule.FileSystemRights == FileSystemRights.FullControl) || (rule.FileSystemRights.HasFlag(FileSystemRights.Write)) || (rule.FileSystemRights.HasFlag(FileSystemRights.Modify)))
-                                    {                                        
-                                        if ((rule.IdentityReference.Value == @"BUILTIN\Users") | (rule.IdentityReference.Value == "Everyone") | (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
-                                        {
-                                            Console.WriteLine("(dll+exe)," + folder);
-                                        }
-                                    }
 
-                                }
+                                string[] exesANDdlls = exes.Concat(dlls).ToArray();
 
+                                CheckExeAndDlls(exesANDdlls, folder, "(exe+dll)");
                             }
                             else if (exes.Length != 0 && dlls.Length == 0)
                             {
-                                DirectoryInfo subInfo = new DirectoryInfo(folder);
-                                DirectorySecurity subSecurity = subInfo.GetAccessControl();
-                                foreach (FileSystemAccessRule rule in subSecurity.GetAccessRules(true, true, typeof(NTAccount)))
-                                {
-                                    if ((rule.FileSystemRights == FileSystemRights.FullControl) || (rule.FileSystemRights.HasFlag(FileSystemRights.Write)) || (rule.FileSystemRights.HasFlag(FileSystemRights.Modify)))
-                                    {
-                                        if ((rule.IdentityReference.Value == @"BUILTIN\Users") || (rule.IdentityReference.Value == "Everyone") || (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
-                                        {
-                                            Console.WriteLine("(exe)," + folder);
-                                        }
-                                    }
 
-                                }
+                                CheckExeAndDlls(exes, folder, "(exe)");
                             }
                             else if (dlls.Length != 0 && exes.Length == 0)
                             {
-                                DirectoryInfo subInfo = new DirectoryInfo(folder);
-                                DirectorySecurity subSecurity = subInfo.GetAccessControl();
-                                foreach (FileSystemAccessRule rule in subSecurity.GetAccessRules(true, true, typeof(NTAccount)))
-                                {
-                                    if ((rule.FileSystemRights == FileSystemRights.FullControl) || (rule.FileSystemRights.HasFlag(FileSystemRights.Write)) || (rule.FileSystemRights.HasFlag(FileSystemRights.Modify)))
-                                    {
-                                        if ((rule.IdentityReference.Value == @"BUILTIN\Users") || (rule.IdentityReference.Value == "Everyone") || (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
-                                        {
-                                            Console.WriteLine("(dll)," + folder);
-                                        }
-                                    }
-
-                                }
+                                CheckExeAndDlls(dlls, folder, "(dll)");
                             }
-                            else if (ps1s.Length != 0 || bats.Length != 0 || scts.Length !=0)
+                            if (ps1s.Length != 0 || bats.Length != 0 || scts.Length !=0)
                             {
-                                DirectoryInfo subInfo = new DirectoryInfo(folder);
-                                DirectorySecurity subSecurity = subInfo.GetAccessControl();
-                                foreach (FileSystemAccessRule rule in subSecurity.GetAccessRules(true, true, typeof(NTAccount)))
-                                {
-                                    if ((rule.FileSystemRights == FileSystemRights.FullControl) || (rule.FileSystemRights.HasFlag(FileSystemRights.Write)) || (rule.FileSystemRights.HasFlag(FileSystemRights.Modify)))
-                                    {
-                                        if ((rule.IdentityReference.Value == @"BUILTIN\Users") || (rule.IdentityReference.Value == "Everyone") || (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
-                                        {
-                                            Console.WriteLine("(scripts)," + folder);
-                                        }
-                                    }
-
-                                }
+                                string[] ps1sANDbats = ps1s.Concat(bats).ToArray();
+                                string[] scripts = ps1sANDbats.Concat(scts).ToArray();
+                                CheckExeAndDlls(scripts, folder, "(scripts)");
                             }
-                            else if (syss.Length != 0)
+                            if (syss.Length != 0)
                             {
-                                DirectoryInfo subInfo = new DirectoryInfo(folder);
-                                DirectorySecurity subSecurity = subInfo.GetAccessControl();
-                                foreach (FileSystemAccessRule rule in subSecurity.GetAccessRules(true, true, typeof(NTAccount)))
-                                {
-                                    if ((rule.FileSystemRights == FileSystemRights.FullControl) || (rule.FileSystemRights.HasFlag(FileSystemRights.Write)) || (rule.FileSystemRights.HasFlag(FileSystemRights.Modify)))
-                                    {
-                                        if ((rule.IdentityReference.Value == @"BUILTIN\Users") || (rule.IdentityReference.Value == "Everyone") || (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
-                                        {
-                                            Console.WriteLine("(drivers)," + folder);
-                                        }
-                                    }
-
-                                }
+                                CheckExeAndDlls(syss, folder, "(drivers)");
                             }
                         }
                         catch (Exception e) { }
-
-                        /*
-                        DirectoryInfo subInfo = new DirectoryInfo(folder);
-                        DirectorySecurity subSecurity = subInfo.GetAccessControl();
-                        foreach (FileSystemAccessRule rule in subSecurity.GetAccessRules(true, true, typeof(NTAccount)))
-                        {
-                            if (rule.FileSystemRights == FileSystemRights.FullControl)
-                            {
-                                if ((rule.IdentityReference.Value == @"BUILTIN\Users") || (rule.IdentityReference.Value == "Everyone") || (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
-                                {
-                                    //Console.WriteLine(folder);
-                                }
-                            }
-                        }*/
                     }
                     catch (UnauthorizedAccessException) { }
                     ShowAllFoldersUnder(folder);
@@ -223,6 +113,24 @@ namespace Get_Writable
                 
             }
             catch (UnauthorizedAccessException) {}
+        }
+        private static void CheckExeAndDlls(string[] files, string folder, string fileType)
+        {
+            foreach (string file in files)
+            {
+                FileSecurity fileSecurity = File.GetAccessControl(file);
+                foreach (FileSystemAccessRule rule in fileSecurity.GetAccessRules(true, true, typeof(NTAccount)))
+                {
+                    if ((rule.FileSystemRights == FileSystemRights.FullControl) || (rule.FileSystemRights.HasFlag(FileSystemRights.Write)) || (rule.FileSystemRights.HasFlag(FileSystemRights.Modify)))
+                    {
+                        if ((rule.IdentityReference.Value == @"BUILTIN\Users") | (rule.IdentityReference.Value == "Everyone") | (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
+                        {
+                            Console.WriteLine(fileType +"," + folder);
+                            return;
+                        }
+                    }
+                }
+            }
         }
     }
 }
