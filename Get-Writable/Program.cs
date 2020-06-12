@@ -29,37 +29,16 @@ namespace Get_Writable
                 System.Environment.Exit(1);
             }
 
-            List<string> subDirs = new List<string>();
-            List<string> subDirs2 = new List<string>();
-            List<string> directories = new List<string>();
-
+            filesInStartDir(startDir);
             ShowAllFoldersUnder(startDir);
-
-            foreach (string sub in directories)
-            {
-                DirectoryInfo subInfo = new DirectoryInfo(sub);
-                DirectorySecurity subSecurity = subInfo.GetAccessControl();
-                foreach (FileSystemAccessRule rule in subSecurity.GetAccessRules(true, true, typeof(NTAccount)))
-                {
-                    if ((rule.FileSystemRights == FileSystemRights.FullControl)|| (rule.FileSystemRights.HasFlag(FileSystemRights.Write)) || (rule.FileSystemRights.HasFlag(FileSystemRights.Modify)))
-                    {
-                        if ((rule.IdentityReference.Value == @"BUILTIN\Users") || (rule.IdentityReference.Value == "Everyone") || (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
-                        {
-                            Console.WriteLine(sub);
-                        }
-                    }
-                }
-                
-            }
-
-
         }
 
         private static void ShowAllFoldersUnder(string path)
         {
-                     
+
             try
             {
+
                 foreach (string folder in Directory.GetDirectories(path))
                 {
 
@@ -124,7 +103,7 @@ namespace Get_Writable
                             {
                                 CheckExeAndDlls(dlls, folder, "(dll)");
                             }
-                            if (ps1s.Length != 0 || bats.Length != 0 || scts.Length !=0 || cmds.Length !=0)
+                            if (ps1s.Length != 0 || bats.Length != 0 || scts.Length != 0 || cmds.Length != 0)
                             {
                                 string[] ps1sANDbats = ps1s.Concat(bats).ToArray();
                                 string[] addSCTs = ps1sANDbats.Concat(scts).ToArray();
@@ -141,10 +120,84 @@ namespace Get_Writable
                     catch (UnauthorizedAccessException) { }
                     ShowAllFoldersUnder(folder);
                 }
-                
+
             }
-            catch (UnauthorizedAccessException) {}
+            catch (UnauthorizedAccessException) { }
         }
+        private static void filesInStartDir(string path)
+        {
+            try
+            {
+                string[] exes = Directory.GetFiles(path, "*.EXE");
+                string[] dlls = Directory.GetFiles(path, "*.DLL");
+                string[] ps1s = Directory.GetFiles(path, "*.ps1");
+                string[] bats = Directory.GetFiles(path, "*.bat");
+                string[] scts = Directory.GetFiles(path, "*.sct");
+                string[] cmds = Directory.GetFiles(path, "*.cmd");
+                string[] syss = Directory.GetFiles(path, "*.sys");
+
+                if (dlls.Length != 0 && exes.Length != 0)
+                {
+
+                    string[] exesANDdlls = exes.Concat(dlls).ToArray();
+
+                    bool checkFiles = CheckExeAndDlls(exesANDdlls, path, "(exe+dll)");
+                    if (checkFiles == false)
+                    {
+                        DirectoryInfo subInfo = new DirectoryInfo(path);
+                        DirectorySecurity subSecurity = subInfo.GetAccessControl();
+                        foreach (FileSystemAccessRule rule in subSecurity.GetAccessRules(true, true, typeof(NTAccount)))
+                        {
+                            if ((rule.FileSystemRights == FileSystemRights.FullControl) || (rule.FileSystemRights.HasFlag(FileSystemRights.Write)) || (rule.FileSystemRights.HasFlag(FileSystemRights.Modify)))
+                            {
+                                if ((rule.IdentityReference.Value == @"BUILTIN\Users") | (rule.IdentityReference.Value == "Everyone") | (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
+                                {
+                                    Console.WriteLine("(directory+exe)," + path);
+                                }
+                            }
+
+                        }
+                    }
+                }
+                else if (exes.Length != 0 && dlls.Length == 0)
+                {
+                    bool checkFiles = CheckExeAndDlls(exes, path, "(exe)");
+                    if (checkFiles == false)
+                    {
+                        DirectoryInfo subInfo = new DirectoryInfo(path);
+                        DirectorySecurity subSecurity = subInfo.GetAccessControl();
+                        foreach (FileSystemAccessRule rule in subSecurity.GetAccessRules(true, true, typeof(NTAccount)))
+                        {
+                            if ((rule.FileSystemRights == FileSystemRights.FullControl) || (rule.FileSystemRights.HasFlag(FileSystemRights.Write)) || (rule.FileSystemRights.HasFlag(FileSystemRights.Modify)))
+                            {
+                                if ((rule.IdentityReference.Value == @"BUILTIN\Users") | (rule.IdentityReference.Value == "Everyone") | (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
+                                {
+                                    Console.WriteLine("(directory+exe)," + path);
+                                }
+                            }
+
+                        }
+                    }
+                }
+                else if (dlls.Length != 0 && exes.Length == 0)
+                {
+                    CheckExeAndDlls(dlls, path, "(dll)");
+                }
+                if (ps1s.Length != 0 || bats.Length != 0 || scts.Length != 0 || cmds.Length != 0)
+                {
+                    string[] ps1sANDbats = ps1s.Concat(bats).ToArray();
+                    string[] addSCTs = ps1sANDbats.Concat(scts).ToArray();
+                    string[] scripts = addSCTs.Concat(cmds).ToArray();
+                    CheckExeAndDlls(scripts, path, "(scripts)");
+                }
+                if (syss.Length != 0)
+                {
+                    CheckExeAndDlls(syss, path, "(drivers)");
+                }
+            }
+            catch (Exception e) { }
+        }
+
         private static bool CheckExeAndDlls(string[] files, string folder, string fileType)
         {
             foreach (string file in files)
@@ -156,7 +209,7 @@ namespace Get_Writable
                     {
                         if ((rule.IdentityReference.Value == @"BUILTIN\Users") | (rule.IdentityReference.Value == "Everyone") | (rule.IdentityReference.Value == @"NT AUTHORITY\Authenticated Users"))
                         {
-                            Console.WriteLine(fileType +"," + folder);
+                            Console.WriteLine(fileType + "," + folder);
                             return true;
                         }
                     }
